@@ -11,7 +11,19 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _toDoController = TextEditingController();
+
   final List _toDoList = [];
+
+  void _addToDo() {
+    setState(() {
+      Map<String, dynamic> newToDo = Map();
+      newToDo["title"] = _toDoController.text;
+      _toDoController.text = '';
+      newToDo["ok"] = false;
+      _toDoList.add(newToDo);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +41,45 @@ class _HomeState extends State<Home> {
             padding: const EdgeInsets.fromLTRB(17, 1, 7, 1),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: TextField(
-                    decoration: InputDecoration(
+                    controller: _toDoController,
+                    decoration: const InputDecoration(
                       labelText: 'Nova tarefa',
                       labelStyle: TextStyle(color: Colors.blueAccent),
                     ),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _addToDo,
                   child: const Text('Add'),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blueAccent,
                   ),
                 ),
               ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.only(top: 10),
+              itemCount: _toDoList.length,
+              itemBuilder: (context, index) {
+                return CheckboxListTile(
+                  title: Text(_toDoList[index]["title"]),
+                  value: _toDoList[index]["ok"],
+                  secondary: CircleAvatar(
+                    child: Icon(
+                      _toDoList[index]["ok"] ? Icons.check : Icons.error,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _toDoList[index]["ok"] = value;
+                    });
+                  },
+                );
+              },
             ),
           ),
         ],
