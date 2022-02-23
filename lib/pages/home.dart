@@ -1,5 +1,6 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,7 +14,18 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
 
-  final List _toDoList = [];
+  List _toDoList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _readData().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
+  }
 
   void _addToDo() {
     setState(() {
@@ -22,6 +34,7 @@ class _HomeState extends State<Home> {
       _toDoController.text = '';
       newToDo["ok"] = false;
       _toDoList.add(newToDo);
+      _saveData();
     });
   }
 
@@ -76,6 +89,7 @@ class _HomeState extends State<Home> {
                   onChanged: (value) {
                     setState(() {
                       _toDoList[index]["ok"] = value;
+                      _saveData();
                     });
                   },
                 );
