@@ -31,13 +31,31 @@ class _HomeState extends State<Home> {
 
   void _addToDo() {
     setState(() {
-      Map<String, dynamic> newToDo = Map();
+      Map<String, dynamic> newToDo = {};
       newToDo["title"] = _toDoController.text;
       _toDoController.text = '';
       newToDo["ok"] = false;
       _toDoList.add(newToDo);
       _saveData();
     });
+  }
+
+  Future<void> _refresh() async{
+    await Future.delayed(const Duration(seconds: 1));
+
+    setState(() {
+      _toDoList.sort((a, b){
+        if (a["ok"] && !b["ok"]) {
+          return 1;
+        } else if (!a["ok"] && b["ok"]) {
+          return -1;
+        } else {
+          return 0;
+        }
+      
+      });
+    });
+    _saveData();
   }
 
   @override
@@ -76,10 +94,13 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-                padding: const EdgeInsets.only(top: 10),
-                itemCount: _toDoList.length,
-                itemBuilder: buildItem),
+            child: RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView.builder(
+                  padding: const EdgeInsets.only(top: 10),
+                  itemCount: _toDoList.length,
+                  itemBuilder: buildItem),
+            ),
           ),
         ],
       ),
@@ -124,7 +145,7 @@ class _HomeState extends State<Home> {
         });
 
         final snack = SnackBar(
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
           content:
               Text("Tarefa ${_lastRemoved?['title']} excluida com sucesso!"),
           action: SnackBarAction(
@@ -138,6 +159,9 @@ class _HomeState extends State<Home> {
           ),
         );
 
+        // ignore: deprecated_member_use
+        Scaffold.of(context).removeCurrentSnackBar(); 
+        // ignore: deprecated_member_use
         Scaffold.of(context).showSnackBar(snack);
       },
     );
